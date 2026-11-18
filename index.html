@@ -379,9 +379,12 @@ function render(){
 async function load(){
   const w = weekDays(day);
   render();
-  try{ await Promise.all([fetchMeals(w[0], w[4]), pullShared(w[0], w[4])]); }
+  const shared = pullShared(w[0], w[4]);   // 공유 서버가 느려도 급식표는 먼저 보여 줘요
+  try{ await fetchMeals(w[0], w[4]); }
   catch(e){ $('view').innerHTML = '<div class="verdict info">급식표를 불러오지 못했어요. 인터넷 연결을 확인해요.</div>'; return; }
   render();
+  await shared;
+  if (view !== 'rank') render();
 }
 function move(step){
   if (view === 'today'){ do { day.setDate(day.getDate() + step); } while (day.getDay() === 0 || day.getDay() === 6); }
