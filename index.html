@@ -55,16 +55,18 @@
   .dish .why{font-size:17px;color:var(--red)}
   .dish.bad{background:var(--redbg);color:var(--red);outline:2px solid #f1b3ab}
   .dish .score{font-size:17px;color:var(--pencil);white-space:nowrap}
-  .dish .score b{color:var(--star)}
-  .dish .rate{min-height:36px;font-size:15px;padding:0 10px;background:var(--chip);box-shadow:none}
-  .reviews{font-size:17px;color:var(--pencil);margin:4px 0 0 36px}
-  .form{margin:8px 0 2px 36px;display:grid;gap:8px}
-  .stars{display:flex;gap:4px}
-  .stars button{font-size:24px;padding:0 6px;min-width:44px;background:var(--chip);box-shadow:none;color:#c9c2ad}
-  .stars button.on{color:var(--star)}
-  .form label{display:flex;align-items:center;gap:8px;font-size:19px}
-  .form input[type=text]{font-family:'Gaegu',cursive;font-size:20px;width:100%;background:#fafafa;border:1px solid #e3e3e3;box-shadow:none}
-  .form .save{background:var(--pick)}
+  .like{min-height:36px;font-size:16px;padding:0 10px;background:var(--chip);box-shadow:none}
+  .like[aria-pressed="true"]{background:#ffd9e2}
+  .act{margin-top:12px;background:#fff;border-radius:14px;padding:12px;display:grid;gap:10px}
+  .act h3{font-family:'Jua',sans-serif;font-weight:400;font-size:18px;margin:0;color:var(--pencil)}
+  .act .two{display:flex;gap:8px;flex-wrap:wrap}
+  .act .two button{flex:1;background:var(--chip);box-shadow:none}
+  .act .two button[aria-pressed="true"]{background:var(--pick)}
+  .act input{font-family:'Gaegu',cursive;font-size:20px;width:100%;background:#fafafa;border:1px solid #e3e3e3;box-shadow:none}
+  .act .send{background:var(--pick)}
+  .act .sum{font-size:18px;color:var(--pencil)}
+  .notes{font-size:18px;color:var(--ink);display:grid;gap:4px}
+  .notes div{background:#fff8e6;border-radius:10px;padding:6px 10px}
   .kcal{text-align:right;color:var(--pencil);font-size:17px;margin-top:6px}
   details{margin-top:8px;color:var(--pencil);font-size:17px}
   summary{cursor:pointer;min-height:36px;display:flex;align-items:center}
@@ -94,7 +96,7 @@
 <body>
 <div class="wrap">
   <div class="top">
-    <h1>🍱 동명 급식 도우미<small>알레르기 확인 · 영양 그래프 · 메뉴 평가</small></h1>
+    <h1>🍱 동명 급식 도우미<small>알레르기 확인 · 영양 그래프 · 급식실에 한마디</small></h1>
     <div class="cls">
       <select id="grade" aria-label="학년"><option value="1">1학년</option><option value="2">2학년</option><option value="3">3학년</option></select>
       <select id="cls" aria-label="반"></select>
@@ -111,7 +113,7 @@
     <button class="tab" data-v="today" aria-selected="true">🍽 오늘</button>
     <button class="tab" data-v="week" aria-selected="false">📅 이번 주</button>
     <button class="tab" data-v="nutri" aria-selected="false">📊 영양</button>
-    <button class="tab" data-v="rank" aria-selected="false">🏆 인기 순위</button>
+    <button class="tab" data-v="rank" aria-selected="false">💬 급식 이야기</button>
   </div>
 
   <div class="nav" id="nav">
@@ -123,7 +125,7 @@
   <div class="card" id="view"><div class="verdict info">급식표를 불러오는 중이에요…</div></div>
 
   <p class="foot">※ 알레르기 번호·영양 정보는 나이스 급식 식단표 그대로예요. 걱정되는 음식은 꼭 영양 선생님께 한 번 더 확인해요.<br>
-  ※ 내 알레르기는 이 기기에만 저장돼요. 메뉴 평가는 반 이름만 함께 저장되고, 이름은 모으지 않아요.</p>
+  ※ 내 알레르기는 이 기기에만 저장돼요. ❤️·✅·💌은 반 이름만 함께 저장되고, 이름은 모으지 않아요.</p>
 </div>
 
 <script src="config.js"></script>
@@ -154,13 +156,12 @@ let mine = new Set(store.get('meal-allergy', []));
 let cfg = Object.assign({ grade: '1', cls: '1' }, store.get('meal-cfg', {}));
 let device = store.get('meal-device', '');
 if (!device){ device = 'd' + Math.random().toString(36).slice(2, 10); store.set('meal-device', device); }
-let myRates = store.get('meal-myrates', {});   // "날짜|메뉴" → {stars, leftover, text}
+let myChecks = store.get('meal-mychecks', {});   // 날짜 → {ate, text}
 let view = 'today';
 let day = today0();
 while (day.getDay() === 0 || day.getDay() === 6) day.setDate(day.getDate() + 1);
 let cache = {};       // 날짜 → [{name,kcal,ntr,orplc,dishes}]
-let shared = {};      // "날짜|메뉴" → {avg,n,left,reviews}
-let openForm = null;
+let likes = {}, likedByMe = new Set(), days = {};   // 공유 서버 요약
 
 // ---------- 학년·반 ----------
 function fillClass(){
@@ -221,58 +222,71 @@ async function fetchMeals(from, to){
 const monday = d => { const m = new Date(d); m.setDate(m.getDate() - ((m.getDay() + 6) % 7)); return m; };
 const weekDays = d => Array.from({ length: 5 }, (_, i) => { const x = monday(d); x.setDate(x.getDate() + i); return x; });
 
-// ---------- 공유 서버(메뉴 평가) ----------
+// ---------- 공유 서버(❤️ 좋아요 · ✅ 다 먹었어요 · 💌 한마디) ----------
+const gcOf = () => `${cfg.grade}-${cfg.cls}`;
+function merge(j, from, to){
+  Object.keys(likes).forEach(k => { const d = k.slice(0, 8); if (d >= from && d <= to) delete likes[k]; });
+  [...likedByMe].forEach(k => { const d = k.slice(0, 8); if (d >= from && d <= to) likedByMe.delete(k); });
+  Object.assign(likes, j.likes || {}); (j.mine || []).forEach(k => likedByMe.add(k));
+  for (const d in days) if (d >= from && d <= to) delete days[d];
+  Object.assign(days, j.days || {});
+}
 async function pullShared(from, to){
   if (!SHARE_URL) return;
   try{
-    const j = await (await fetch(`${SHARE_URL}?from=${ymd(from)}&to=${ymd(to)}`)).json();
-    if (j.ok) j.items.forEach(it => { shared[it.date + '|' + it.dish] = it; });
+    const j = await (await fetch(`${SHARE_URL}?from=${ymd(from)}&to=${ymd(to)}&did=${device}`)).json();
+    if (j.ok) merge(j, ymd(from), ymd(to));
   }catch(e){}
 }
-async function sendRate(date, dish, r){
-  const body = { action: 'rate', date, dish, gc: `${cfg.grade}-${cfg.cls}`, did: device, stars: r.stars, leftover: r.leftover ? 1 : 0, text: r.text || '' };
-  const res = await fetch(SHARE_URL, { method: 'POST', body: JSON.stringify(body) });
+async function post(body){
+  const res = await fetch(SHARE_URL, { method: 'POST', body: JSON.stringify(Object.assign({ gc: gcOf(), did: device }, body)) });
   const j = await res.json();
   if (!j.ok) throw new Error(j.error || '저장하지 못했어요');
-  if (j.item) shared[date + '|' + dish] = j.item;
+  merge(j, body.date, body.date);
 }
 
 // ---------- 화면 ----------
 const badOf = d => d.nums.filter(n => mine.has(n));
 function dishHtml(date, d){
-  const hit = badOf(d), key = date + '|' + d.name, s = shared[key], my = myRates[key];
-  const canRate = SHARE_URL && date <= ymd(today0());
-  const score = s && s.n ? `<span class="score"><b>★</b> ${s.avg.toFixed(1)} · ${s.n}명${s.left ? ` · 🥡 ${s.left}` : ''}</span>` : '<span class="score"></span>';
-  let h = `<div class="dish${hit.length ? ' bad' : ''}"><div class="row"><span class="mark">${hit.length ? '⚠️' : (mine.size ? '✓' : '·')}</span>`
+  const hit = badOf(d), key = date + '|' + d.name, n = likes[key] || 0, on = likedByMe.has(key);
+  const canAct = SHARE_URL && date <= ymd(today0());
+  return `<div class="dish${hit.length ? ' bad' : ''}"><div class="row"><span class="mark">${hit.length ? '⚠️' : (mine.size ? '✓' : '·')}</span>`
     + `<span class="name">${esc(d.name)}${hit.length ? ` <span class="why">${hit.map(n => ALLERGENS[n]).join('·')}</span>` : ''}</span>`
-    + `<span class="meta">${score}${canRate ? `<button class="rate" data-k="${esc(key)}">${my ? '✏️ 내 평가' : '⭐ 평가'}</button>` : ''}</span></div>`;
-  if (s && s.reviews && s.reviews.length) h += `<div class="reviews">💬 ${s.reviews.map(esc).join(' · ')}</div>`;
-  if (openForm === key){
-    const r = my || { stars: 0, leftover: false, text: '' };
-    h += `<div class="form" data-k="${esc(key)}">
-      <div class="stars">${[1, 2, 3, 4, 5].map(n => `<button data-s="${n}" class="${n <= r.stars ? 'on' : ''}" aria-label="${n}점">★</button>`).join('')}</div>
-      <label><input type="checkbox" class="left" ${r.leftover ? 'checked' : ''} style="width:24px;height:24px"> 🥡 남길 것 같아요</label>
-      <input type="text" class="text" maxlength="30" placeholder="한 줄 평 (30자, 음식 이야기만)" value="${esc(r.text)}">
-      <button class="save">저장</button></div>`;
-  }
-  return h + '</div>';
+    + `<span class="meta">${canAct ? `<button class="like" data-k="${esc(key)}" aria-pressed="${on}" aria-label="좋아해요">${on ? '❤️' : '🤍'} ${n || ''}</button>` : (n ? `<span class="score">❤️ ${n}</span>` : '')}</span></div></div>`;
 }
-function wireDishes(){
-  $('view').querySelectorAll('.rate').forEach(b => b.onclick = () => { openForm = openForm === b.dataset.k ? null : b.dataset.k; render(); });
-  $('view').querySelectorAll('.form').forEach(f => {
-    const key = f.dataset.k; let stars = (myRates[key] || {}).stars || 0;
-    f.querySelectorAll('.stars button').forEach(b => b.onclick = () => {
-      stars = +b.dataset.s; f.querySelectorAll('.stars button').forEach(x => x.classList.toggle('on', +x.dataset.s <= stars));
-    });
-    f.querySelector('.save').onclick = async () => {
-      if (!stars){ alert('별점을 골라 주세요.'); return; }
-      const r = { stars, leftover: f.querySelector('.left').checked, text: f.querySelector('.text').value.trim() };
-      const [date, dish] = [key.slice(0, 8), key.slice(9)];
-      f.querySelector('.save').textContent = '저장 중…';
-      try{ await sendRate(date, dish, r); myRates[key] = r; store.set('meal-myrates', myRates); openForm = null; render(); }
-      catch(e){ alert(e.message); f.querySelector('.save').textContent = '저장'; }
-    };
+function actHtml(date){
+  if (!SHARE_URL || date > ymd(today0())) return '';
+  const my = myChecks[date] || { ate: '', text: '' }, d = days[date];
+  return `<div class="act" id="act">
+    <h3>✅ 오늘 나의 실천</h3>
+    <div class="two"><button data-ate="all" aria-pressed="${my.ate === 'all'}">✅ 다 먹었어요</button><button data-ate="some" aria-pressed="${my.ate === 'some'}">🙂 조금 남겼어요</button></div>
+    <h3>💌 급식실에 한마디</h3>
+    <input type="text" id="note" maxlength="40" placeholder="고마운 마음이나 오늘 잘 먹은 이야기를 적어요" value="${esc(my.text)}">
+    <button class="send" id="send">보내기</button>
+    ${d ? `<div class="sum">오늘 ${d.all}명이 다 먹었어요${d.some ? ` · ${d.some}명은 조금 남겼어요` : ''}</div>` : ''}
+    ${d && d.notes.length ? `<div class="notes">${d.notes.map(t => `<div>💌 ${esc(t)}</div>`).join('')}</div>` : ''}
+  </div>`;
+}
+function wireDishes(date){
+  $('view').querySelectorAll('.like').forEach(b => b.onclick = async () => {
+    const key = b.dataset.k, on = !likedByMe.has(key);
+    b.disabled = true;
+    try{ await post({ action: 'like', date: key.slice(0, 8), dish: key.slice(9), on }); }catch(e){ alert(e.message); }
+    render();
   });
+  const act = $('act'); if (!act) return;
+  let ate = (myChecks[date] || {}).ate || '';
+  act.querySelectorAll('[data-ate]').forEach(b => b.onclick = () => {
+    ate = ate === b.dataset.ate ? '' : b.dataset.ate;
+    act.querySelectorAll('[data-ate]').forEach(x => x.setAttribute('aria-pressed', x.dataset.ate === ate));
+  });
+  $('send').onclick = async () => {
+    const text = $('note').value.trim();
+    if (!ate && !text){ alert('✅ 실천을 고르거나 한마디를 적어 주세요.'); return; }
+    $('send').textContent = '보내는 중…';
+    try{ await post({ action: 'check', date, ate, text }); myChecks[date] = { ate, text }; store.set('meal-mychecks', myChecks); render(); }
+    catch(e){ alert(e.message); $('send').textContent = '보내기'; }
+  };
 }
 
 function renderToday(){
@@ -288,8 +302,9 @@ function renderToday(){
     <div class="tray">${m.dishes.map(d => dishHtml(ymd(day), d)).join('')}</div>
     <div class="kcal">${m.kcal ? m.kcal + ' kcal' : ''}</div>
     ${m.orplc.length ? `<details><summary>🌾 원산지 보기</summary>${m.orplc.map(esc).join(' · ')}</details>` : ''}`).join('')
-    + (SHARE_URL ? '' : '<p class="foot">※ 메뉴 평가는 선생님이 공유 서버를 연결하면 열려요.</p>');
-  wireDishes();
+    + actHtml(ymd(day))
+    + (SHARE_URL ? '' : '<p class="foot">※ ❤️ 좋아요 · ✅ 나의 실천 · 💌 급식실에 한마디는 선생님이 공유 서버를 연결하면 열려요.</p>');
+  wireDishes(ymd(day));
 }
 
 function renderWeek(){
@@ -344,15 +359,15 @@ function renderNutri(){
 }
 
 async function renderRank(){
-  if (!SHARE_URL){ $('view').innerHTML = '<div class="verdict info">인기 순위는 선생님이 공유 서버를 연결하면 볼 수 있어요.</div>'; return; }
-  $('view').innerHTML = '<div class="verdict info">순위를 불러오는 중이에요…</div>';
+  if (!SHARE_URL){ $('view').innerHTML = '<div class="verdict info">급식 이야기는 선생님이 공유 서버를 연결하면 볼 수 있어요.</div>'; return; }
+  $('view').innerHTML = '<div class="verdict info">불러오는 중이에요…</div>';
   try{
-    const j = await (await fetch(`${SHARE_URL}?rank=1`)).json();
-    const li = (arr, f) => arr.length ? `<ol class="rank">${arr.map(f).join('')}</ol>` : '<p class="foot">아직 평가가 모자라요. (3명 이상 평가한 메뉴만 보여요)</p>';
-    $('view').innerHTML = `<h2>🏆 최근 한 달 인기 메뉴</h2>${li(j.top, x => `<li>${esc(x.dish)}<span class="n">★ ${x.avg.toFixed(1)} · ${x.n}명</span></li>`)}
-      <h2 style="margin-top:14px">🥡 남길 것 같다는 메뉴</h2>${li(j.left, x => `<li>${esc(x.dish)}<span class="n">${x.left}명 / ${x.n}명</span></li>`)}
-      <h2 style="margin-top:14px">🏫 반별 참여</h2>${j.classes.length ? `<table><tr><th>반</th><th>평가 수</th></tr>${j.classes.map(c => `<tr><td>${esc(c.gc)}</td><td>${c.n}</td></tr>`).join('')}</table>` : '<p class="foot">아직 없어요.</p>'}`;
-  }catch(e){ $('view').innerHTML = '<div class="verdict info">순위를 불러오지 못했어요.</div>'; }
+    const j = await (await fetch(`${SHARE_URL}?story=1`)).json();
+    const empty = '<p class="foot">아직 모인 이야기가 없어요.</p>';
+    $('view').innerHTML = `<h2>❤️ 최근 한 달, 좋아요가 많은 메뉴</h2>${j.top.length ? `<ol class="rank">${j.top.map(x => `<li>${esc(x.dish)}<span class="n">❤️ ${x.n}</span></li>`).join('')}</ol>` : empty}
+      <h2 style="margin-top:14px">🏫 반별 「다 먹었어요」 실천</h2>${j.classes.length ? `<table><tr><th>반</th><th>다 먹었어요</th><th>실천률</th></tr>${j.classes.map(c => `<tr><td>${esc(c.gc)}</td><td>${c.all} / ${c.n}</td><td><b>${c.n ? Math.round(c.all / c.n * 100) : 0}%</b></td></tr>`).join('')}</table>` : empty}
+      <h2 style="margin-top:14px">💌 급식실에 보낸 한마디 (${j.noteCount}개)</h2>${j.notes.length ? `<div class="notes">${j.notes.map(x => `<div>💌 ${esc(x.text)} <span class="foot">${+x.date.slice(4, 6)}/${+x.date.slice(6)}</span></div>`).join('')}</div>` : empty}`;
+  }catch(e){ $('view').innerHTML = '<div class="verdict info">불러오지 못했어요.</div>'; }
 }
 
 function render(){
@@ -371,7 +386,7 @@ async function load(){
 function move(step){
   if (view === 'today'){ do { day.setDate(day.getDate() + step); } while (day.getDay() === 0 || day.getDay() === 6); }
   else day.setDate(day.getDate() + step * 7);
-  openForm = null; load();
+  load();
 }
 $('prev').onclick = () => move(-1);
 $('next').onclick = () => move(1);
