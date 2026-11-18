@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>동명 급식 알레르기 알리미</title>
+<title>동명 급식 도우미</title>
 <meta name="theme-color" content="#fffdf6">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&display=swap" rel="stylesheet">
@@ -11,53 +11,93 @@
   :root{
     --desk:#e6efe4; --paper:#fffdf6; --ink:#2b3a55; --pencil:#5b6475; --line:#dfe8d8;
     --red:#d9433a; --redbg:#fde6e3; --green:#2e8b57; --greenbg:#e5f4ea; --tray:#cfe3d4; --chip:#f3efe2; --pick:#ffcf6e;
+    --c1:#f2a65a; --c2:#5aa9e6; --c3:#7bc47f; --star:#f5b301;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--desk);color:var(--ink);font-family:'Gaegu',cursive;font-size:21px;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:640px;margin:0 auto;padding:20px 16px 60px}
-  .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-  h1{font-family:'Jua',sans-serif;font-size:28px;margin:0;letter-spacing:1px}
-  h1 small{display:block;font-family:'Gaegu',cursive;font-size:18px;color:var(--pencil);letter-spacing:0}
-  .nav{margin-left:auto;display:flex;align-items:center;gap:6px}
-  button{font-family:'Jua',sans-serif;font-size:17px;border:0;border-radius:12px;min-height:44px;padding:0 14px;cursor:pointer;color:var(--ink);background:#fff;box-shadow:0 2px 0 rgba(0,0,0,.08)}
-  .nav .day{font-family:'Jua',sans-serif;font-size:19px;min-width:96px;text-align:center}
+  .wrap{max-width:680px;margin:0 auto;padding:20px 16px 60px}
+  .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  h1{font-family:'Jua',sans-serif;font-size:28px;margin:0}
+  h1 small{display:block;font-family:'Gaegu',cursive;font-size:18px;color:var(--pencil)}
+  button,select,input{font-family:'Jua',sans-serif;font-size:17px;border:0;border-radius:12px;min-height:44px;padding:0 14px;color:var(--ink);background:#fff;box-shadow:0 2px 0 rgba(0,0,0,.08)}
+  button{cursor:pointer}
+  .cls{margin-left:auto;display:flex;gap:6px}
 
-  .card{background:var(--paper);border-radius:16px;box-shadow:0 2px 0 #cfd9c8,0 10px 24px rgba(40,70,40,.10);padding:18px 18px 16px;margin-bottom:14px}
+  .tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+  .tab{background:#f4f1e6}
+  .tab[aria-selected="true"]{background:var(--pick)}
+  .nav{display:flex;align-items:center;gap:6px;margin-bottom:12px}
+  .nav .day{font-family:'Jua',sans-serif;font-size:20px;flex:1;text-align:center}
+
+  .card{background:var(--paper);border-radius:16px;box-shadow:0 2px 0 #cfd9c8,0 10px 24px rgba(40,70,40,.10);padding:16px 18px;margin-bottom:14px}
   .card h2{font-family:'Jua',sans-serif;font-size:19px;margin:0 0 10px;color:var(--pencil);font-weight:400}
 
+  .fold{display:flex;align-items:center;width:100%;background:none;box-shadow:none;padding:0;margin-bottom:8px;font-size:19px;color:var(--pencil)}
+  .fold .arrow{margin-left:auto;background:var(--chip);border-radius:12px;padding:6px 12px;color:var(--ink);font-size:16px}
   .chips{display:flex;flex-wrap:wrap;gap:8px}
-  .chip{font-family:'Gaegu',cursive;font-weight:700;font-size:19px;background:var(--chip);min-height:44px;padding:0 12px;border-radius:22px}
+  .chip{font-family:'Gaegu',cursive;font-weight:700;font-size:19px;background:var(--chip);padding:0 12px;border-radius:22px}
   .chip[aria-pressed="true"]{background:var(--pick)}
   .chip b{font-family:'Jua',sans-serif;font-weight:400;font-size:14px;color:var(--pencil);margin-right:4px}
   .mine{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .mine .tag{background:var(--pick);border-radius:14px;padding:2px 10px;font-weight:700}
   .mine .none{color:var(--pencil)}
-  .fold{display:flex;align-items:center;width:100%;background:none;box-shadow:none;padding:0;margin-bottom:8px;font-size:19px;color:var(--pencil);font-weight:400}
-  .fold .arrow{margin-left:auto;background:var(--chip);border-radius:12px;padding:6px 12px;color:var(--ink);font-size:16px}
 
-  .verdict{font-family:'Jua',sans-serif;font-size:22px;padding:12px 14px;border-radius:12px;margin-bottom:12px}
+  .verdict{font-family:'Jua',sans-serif;font-size:21px;padding:12px 14px;border-radius:12px;margin-bottom:12px}
   .verdict.ok{background:var(--greenbg);color:var(--green)}
   .verdict.warn{background:var(--redbg);color:var(--red)}
   .verdict.info{background:#eef1f6;color:var(--pencil)}
-  .meal-name{font-family:'Jua',sans-serif;font-size:17px;color:var(--pencil);margin:10px 0 4px}
   .tray{background:var(--tray);border-radius:14px;padding:8px;display:grid;gap:6px}
-  .dish{background:#fff;border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700}
+  .dish{background:#fff;border-radius:10px;padding:8px 12px}
+  .dish .row{display:flex;align-items:center;gap:6px 10px;font-size:22px;font-weight:700;flex-wrap:wrap}
+  .dish .name{flex:1 1 200px;min-width:0}
+  .dish .meta{display:flex;align-items:center;gap:8px;margin-left:auto}
   .dish .mark{font-size:20px;width:26px;text-align:center}
-  .dish .why{margin-left:auto;font-size:17px;font-weight:700;color:var(--red);text-align:right}
+  .dish .why{font-size:17px;color:var(--red)}
   .dish.bad{background:var(--redbg);color:var(--red);outline:2px solid #f1b3ab}
+  .dish .score{font-size:17px;color:var(--pencil);white-space:nowrap}
+  .dish .score b{color:var(--star)}
+  .dish .rate{min-height:36px;font-size:15px;padding:0 10px;background:var(--chip);box-shadow:none}
+  .reviews{font-size:17px;color:var(--pencil);margin:4px 0 0 36px}
+  .form{margin:8px 0 2px 36px;display:grid;gap:8px}
+  .stars{display:flex;gap:4px}
+  .stars button{font-size:24px;padding:0 6px;min-width:44px;background:var(--chip);box-shadow:none;color:#c9c2ad}
+  .stars button.on{color:var(--star)}
+  .form label{display:flex;align-items:center;gap:8px;font-size:19px}
+  .form input[type=text]{font-family:'Gaegu',cursive;font-size:20px;width:100%;background:#fafafa;border:1px solid #e3e3e3;box-shadow:none}
+  .form .save{background:var(--pick)}
   .kcal{text-align:right;color:var(--pencil);font-size:17px;margin-top:6px}
+  details{margin-top:8px;color:var(--pencil);font-size:17px}
+  summary{cursor:pointer;min-height:36px;display:flex;align-items:center}
+
+  .week{display:grid;gap:10px}
+  .wday{border-radius:12px;background:#fff;padding:10px 12px;border:2px solid transparent}
+  .wday.bad{border-color:#f1b3ab;background:#fff7f6}
+  .wday.today{box-shadow:inset 0 0 0 2px var(--pick)}
+  .wday .h{display:flex;gap:8px;align-items:center;font-family:'Jua',sans-serif;font-size:18px}
+  .wday .h .k{margin-left:auto;color:var(--pencil);font-family:'Gaegu',cursive;font-size:17px}
+  .wday .m{font-size:19px;line-height:1.35}
+  .wday .m .x{color:var(--red);font-weight:700}
+
+  .legend{display:flex;gap:14px;font-size:17px;color:var(--pencil);margin:4px 0 8px}
+  .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+  svg text{font-family:'Gaegu',cursive}
+  table{width:100%;border-collapse:collapse;font-size:18px}
+  th,td{padding:6px 4px;border-bottom:1px dashed #dde3d8;text-align:center}
+  th:first-child,td:first-child{text-align:left}
+  .rank li{font-size:20px;padding:6px 0;display:flex;gap:8px}
+  .rank li .n{margin-left:auto;color:var(--pencil);font-size:17px}
+  .rank{margin:0;padding-left:24px}
   .foot{color:var(--pencil);font-size:17px;line-height:1.4;margin-top:6px}
-  .hidden{display:none}
+  .hidden{display:none !important}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top">
-    <h1>🍱 급식 알레르기 알리미<small>동명중학교 · 나이스 급식 식단 기준</small></h1>
-    <div class="nav">
-      <button id="prev" aria-label="이전 날">◀</button>
-      <span class="day" id="day">-</span>
-      <button id="next" aria-label="다음 날">▶</button>
+    <h1>🍱 동명 급식 도우미<small>알레르기 확인 · 영양 그래프 · 메뉴 평가</small></h1>
+    <div class="cls">
+      <select id="grade" aria-label="학년"><option value="1">1학년</option><option value="2">2학년</option><option value="3">3학년</option></select>
+      <select id="cls" aria-label="반"></select>
     </div>
   </div>
 
@@ -67,18 +107,33 @@
     <div class="chips hidden" id="pick" style="margin-top:12px"></div>
   </div>
 
-  <div class="card">
-    <div id="result"><div class="verdict info">급식표를 불러오는 중이에요…</div></div>
+  <div class="tabs" role="tablist">
+    <button class="tab" data-v="today" aria-selected="true">🍽 오늘</button>
+    <button class="tab" data-v="week" aria-selected="false">📅 이번 주</button>
+    <button class="tab" data-v="nutri" aria-selected="false">📊 영양</button>
+    <button class="tab" data-v="rank" aria-selected="false">🏆 인기 순위</button>
   </div>
 
-  <p class="foot">※ 알레르기 번호는 나이스 급식 식단표에 나온 그대로예요. 걱정되는 음식은 꼭 영양 선생님께 한 번 더 확인해요.<br>※ 내가 고른 알레르기는 이 기기에만 저장되고, 어디에도 보내지 않아요.</p>
+  <div class="nav" id="nav">
+    <button id="prev" aria-label="이전">◀</button>
+    <span class="day" id="day">-</span>
+    <button id="next" aria-label="다음">▶</button>
+  </div>
+
+  <div class="card" id="view"><div class="verdict info">급식표를 불러오는 중이에요…</div></div>
+
+  <p class="foot">※ 알레르기 번호·영양 정보는 나이스 급식 식단표 그대로예요. 걱정되는 음식은 꼭 영양 선생님께 한 번 더 확인해요.<br>
+  ※ 내 알레르기는 이 기기에만 저장돼요. 메뉴 평가는 반 이름만 함께 저장되고, 이름은 모으지 않아요.</p>
 </div>
 
 <script src="config.js"></script>
 <script>
+const CONF = window.APP_CONFIG || {};
 const OFFICE = 'G10', SCHOOL = '7441032';
-const NEIS_KEY = String((window.APP_CONFIG || {}).NEIS_KEY || '').trim();
-// 식품의약품안전처 알레르기 유발 식품 표시 번호 (나이스 급식 식단표와 같은 번호)
+const NEIS_KEY = String(CONF.NEIS_KEY || '').trim();
+const SHARE_URL = String(CONF.SHARE_URL || '').trim();
+const CLASSES = { 1: 3, 2: 3, 3: 2 };
+// 식품의약품안전처 알레르기 유발 식품 번호 (나이스 식단표와 같은 번호)
 const ALLERGENS = ['', '난류', '우유', '메밀', '땅콩', '대두', '밀', '고등어', '게', '새우', '돼지고기',
   '복숭아', '토마토', '아황산류', '호두', '닭고기', '쇠고기', '오징어', '조개류', '잣'];
 
@@ -86,27 +141,42 @@ const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 };
-let mine = new Set(store.get('meal-allergy', []));
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(2, '0');
 const ymd = d => d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate());
+const fromYmd = s => new Date(+s.slice(0, 4), +s.slice(4, 6) - 1, +s.slice(6, 8));
 const WD = ['일', '월', '화', '수', '목', '금', '토'];
+const md = d => `${d.getMonth() + 1}/${d.getDate()}(${WD[d.getDay()]})`;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const today0 = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
 
-let day = new Date(); day.setHours(0, 0, 0, 0);
+let mine = new Set(store.get('meal-allergy', []));
+let cfg = Object.assign({ grade: '1', cls: '1' }, store.get('meal-cfg', {}));
+let device = store.get('meal-device', '');
+if (!device){ device = 'd' + Math.random().toString(36).slice(2, 10); store.set('meal-device', device); }
+let myRates = store.get('meal-myrates', {});   // "날짜|메뉴" → {stars, leftover, text}
+let view = 'today';
+let day = today0();
 while (day.getDay() === 0 || day.getDay() === 6) day.setDate(day.getDate() + 1);
+let cache = {};       // 날짜 → [{name,kcal,ntr,orplc,dishes}]
+let shared = {};      // "날짜|메뉴" → {avg,n,left,reviews}
+let openForm = null;
 
-function move(step){
-  do { day.setDate(day.getDate() + step); } while (day.getDay() === 0 || day.getDay() === 6);
-  load();
+// ---------- 학년·반 ----------
+function fillClass(){
+  $('grade').value = cfg.grade;
+  $('cls').innerHTML = Array.from({ length: CLASSES[cfg.grade] }, (_, i) => `<option value="${i + 1}">${i + 1}반</option>`).join('');
+  if (+cfg.cls > CLASSES[cfg.grade]) cfg.cls = '1';
+  $('cls').value = cfg.cls;
 }
+$('grade').onchange = () => { cfg.grade = $('grade').value; cfg.cls = '1'; store.set('meal-cfg', cfg); fillClass(); };
+$('cls').onchange = () => { cfg.cls = $('cls').value; store.set('meal-cfg', cfg); };
 
 // ---------- 내 알레르기 ----------
 function renderMine(){
   const list = [...mine].sort((a, b) => a - b);
-  $('mine').innerHTML = (list.length
-    ? list.map(n => `<span class="tag">${ALLERGENS[n]}</span>`).join('')
-    : '<span class="none">아직 고르지 않았어요 · 펼쳐서 골라요</span>');
+  $('mine').innerHTML = list.length ? list.map(n => `<span class="tag">${ALLERGENS[n]}</span>`).join('')
+    : '<span class="none">아직 고르지 않았어요 · 펼쳐서 골라요</span>';
   const open = !$('pick').classList.contains('hidden');
   $('fold').setAttribute('aria-expanded', open);
   $('arrow').textContent = open ? '▴ 접기' : '▾ 펼치기';
@@ -114,53 +184,202 @@ function renderMine(){
     `<button class="chip" data-n="${i + 1}" aria-pressed="${mine.has(i + 1)}"><b>${i + 1}</b>${name}</button>`).join('');
   $('pick').querySelectorAll('.chip').forEach(b => b.onclick = () => {
     const n = +b.dataset.n; mine.has(n) ? mine.delete(n) : mine.add(n);
-    store.set('meal-allergy', [...mine]); renderMine(); show();
+    store.set('meal-allergy', [...mine]); renderMine(); render();
   });
 }
+$('fold').onclick = () => { $('pick').classList.toggle('hidden'); renderMine(); };
 
-// ---------- 급식 ----------
-let meals = [];   // [{name, kcal, dishes:[{name, nums}]}]
+// ---------- 나이스 급식 ----------
+const splitBr = s => String(s || '').split(/<br\s*\/?>/i).map(x => x.trim()).filter(Boolean);
 function parseDishes(html){
-  return String(html).split(/<br\s*\/?>/i).map(s => s.trim()).filter(Boolean).map(line => {
+  return splitBr(html).map(line => {
     const m = line.match(/\(([\d.\s]+)\)\s*$/);
     const nums = m ? m[1].split('.').map(x => +x.trim()).filter(n => n >= 1 && n <= 19) : [];
     return { name: (m ? line.slice(0, m.index) : line).trim(), nums };
   });
 }
-async function load(){
-  $('day').textContent = `${day.getMonth() + 1}/${day.getDate()}(${WD[day.getDay()]})`;
-  $('result').innerHTML = '<div class="verdict info">급식표를 불러오는 중이에요…</div>';
-  try{
-    const key = NEIS_KEY ? `&KEY=${encodeURIComponent(NEIS_KEY)}` : '';
-    const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&pSize=10&ATPT_OFCDC_SC_CODE=${OFFICE}&SD_SCHUL_CODE=${SCHOOL}${key}&MLSV_YMD=${ymd(day)}`;
-    const j = await (await fetch(url)).json();
-    const rows = j.mealServiceDietInfo ? j.mealServiceDietInfo[1].row : [];
-    meals = rows.map(r => ({ name: r.MMEAL_SC_NM, kcal: r.CAL_INFO, dishes: parseDishes(r.DDISH_NM) }));
-  }catch(e){ meals = null; }
-  show();
+function parseNtr(html){
+  const o = {};
+  splitBr(html).forEach(l => { const m = l.match(/^(.+?)\s*:\s*([\d.]+)/); if (m) o[m[1].trim()] = +m[2]; });
+  return o;
 }
-function show(){
-  if (meals === null){ $('result').innerHTML = '<div class="verdict info">급식표를 불러오지 못했어요. 인터넷 연결을 확인해요.</div>'; return; }
-  if (!meals.length){ $('result').innerHTML = '<div class="verdict info">이날은 급식이 없어요.</div>'; return; }
-  const bad = meals.flatMap(m => m.dishes).filter(d => d.nums.some(n => mine.has(n)));
-  const verdict = !mine.size
-    ? '<div class="verdict info">위에서 내 알레르기를 고르면 조심할 메뉴를 빨간색으로 알려 줘요.</div>'
-    : bad.length
-      ? `<div class="verdict warn">⚠️ 조심할 메뉴가 ${bad.length}개 있어요</div>`
-      : '<div class="verdict ok">🙆 오늘 메뉴는 내 알레르기와 겹치지 않아요</div>';
-  $('result').innerHTML = verdict + meals.map(m => `
-    ${meals.length > 1 ? `<div class="meal-name">${esc(m.name)}</div>` : ''}
-    <div class="tray">${m.dishes.map(d => {
-      const hit = d.nums.filter(n => mine.has(n));
-      return `<div class="dish${hit.length ? ' bad' : ''}"><span class="mark">${hit.length ? '⚠️' : (mine.size ? '✓' : '·')}</span>${esc(d.name)}`
-        + (hit.length ? `<span class="why">${hit.map(n => ALLERGENS[n]).join('·')}</span>` : '') + '</div>';
-    }).join('')}</div>
-    ${m.kcal ? `<div class="kcal">${esc(m.kcal)}</div>` : ''}`).join('');
+async function fetchMeals(from, to){
+  const key = NEIS_KEY ? `&KEY=${encodeURIComponent(NEIS_KEY)}` : '';
+  const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&pSize=50&ATPT_OFCDC_SC_CODE=${OFFICE}&SD_SCHUL_CODE=${SCHOOL}${key}&MLSV_FROM_YMD=${ymd(from)}&MLSV_TO_YMD=${ymd(to)}`;
+  const j = await (await fetch(url)).json();
+  const rows = j.mealServiceDietInfo ? j.mealServiceDietInfo[1].row : [];
+  for (let d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) cache[ymd(d)] = cache[ymd(d)] || [];
+  const fresh = {};
+  rows.forEach(r => {
+    (fresh[r.MLSV_YMD] = fresh[r.MLSV_YMD] || []).push({
+      name: r.MMEAL_SC_NM, kcal: parseFloat(r.CAL_INFO) || 0, ntr: parseNtr(r.NTR_INFO),
+      orplc: splitBr(r.ORPLC_INFO), dishes: parseDishes(r.DDISH_NM)
+    });
+  });
+  Object.assign(cache, fresh);
+}
+const monday = d => { const m = new Date(d); m.setDate(m.getDate() - ((m.getDay() + 6) % 7)); return m; };
+const weekDays = d => Array.from({ length: 5 }, (_, i) => { const x = monday(d); x.setDate(x.getDate() + i); return x; });
+
+// ---------- 공유 서버(메뉴 평가) ----------
+async function pullShared(from, to){
+  if (!SHARE_URL) return;
+  try{
+    const j = await (await fetch(`${SHARE_URL}?from=${ymd(from)}&to=${ymd(to)}`)).json();
+    if (j.ok) j.items.forEach(it => { shared[it.date + '|' + it.dish] = it; });
+  }catch(e){}
+}
+async function sendRate(date, dish, r){
+  const body = { action: 'rate', date, dish, gc: `${cfg.grade}-${cfg.cls}`, did: device, stars: r.stars, leftover: r.leftover ? 1 : 0, text: r.text || '' };
+  const res = await fetch(SHARE_URL, { method: 'POST', body: JSON.stringify(body) });
+  const j = await res.json();
+  if (!j.ok) throw new Error(j.error || '저장하지 못했어요');
+  if (j.item) shared[date + '|' + dish] = j.item;
 }
 
-$('fold').onclick = () => { $('pick').classList.toggle('hidden'); renderMine(); };
+// ---------- 화면 ----------
+const badOf = d => d.nums.filter(n => mine.has(n));
+function dishHtml(date, d){
+  const hit = badOf(d), key = date + '|' + d.name, s = shared[key], my = myRates[key];
+  const canRate = SHARE_URL && date <= ymd(today0());
+  const score = s && s.n ? `<span class="score"><b>★</b> ${s.avg.toFixed(1)} · ${s.n}명${s.left ? ` · 🥡 ${s.left}` : ''}</span>` : '<span class="score"></span>';
+  let h = `<div class="dish${hit.length ? ' bad' : ''}"><div class="row"><span class="mark">${hit.length ? '⚠️' : (mine.size ? '✓' : '·')}</span>`
+    + `<span class="name">${esc(d.name)}${hit.length ? ` <span class="why">${hit.map(n => ALLERGENS[n]).join('·')}</span>` : ''}</span>`
+    + `<span class="meta">${score}${canRate ? `<button class="rate" data-k="${esc(key)}">${my ? '✏️ 내 평가' : '⭐ 평가'}</button>` : ''}</span></div>`;
+  if (s && s.reviews && s.reviews.length) h += `<div class="reviews">💬 ${s.reviews.map(esc).join(' · ')}</div>`;
+  if (openForm === key){
+    const r = my || { stars: 0, leftover: false, text: '' };
+    h += `<div class="form" data-k="${esc(key)}">
+      <div class="stars">${[1, 2, 3, 4, 5].map(n => `<button data-s="${n}" class="${n <= r.stars ? 'on' : ''}" aria-label="${n}점">★</button>`).join('')}</div>
+      <label><input type="checkbox" class="left" ${r.leftover ? 'checked' : ''} style="width:24px;height:24px"> 🥡 남길 것 같아요</label>
+      <input type="text" class="text" maxlength="30" placeholder="한 줄 평 (30자, 음식 이야기만)" value="${esc(r.text)}">
+      <button class="save">저장</button></div>`;
+  }
+  return h + '</div>';
+}
+function wireDishes(){
+  $('view').querySelectorAll('.rate').forEach(b => b.onclick = () => { openForm = openForm === b.dataset.k ? null : b.dataset.k; render(); });
+  $('view').querySelectorAll('.form').forEach(f => {
+    const key = f.dataset.k; let stars = (myRates[key] || {}).stars || 0;
+    f.querySelectorAll('.stars button').forEach(b => b.onclick = () => {
+      stars = +b.dataset.s; f.querySelectorAll('.stars button').forEach(x => x.classList.toggle('on', +x.dataset.s <= stars));
+    });
+    f.querySelector('.save').onclick = async () => {
+      if (!stars){ alert('별점을 골라 주세요.'); return; }
+      const r = { stars, leftover: f.querySelector('.left').checked, text: f.querySelector('.text').value.trim() };
+      const [date, dish] = [key.slice(0, 8), key.slice(9)];
+      f.querySelector('.save').textContent = '저장 중…';
+      try{ await sendRate(date, dish, r); myRates[key] = r; store.set('meal-myrates', myRates); openForm = null; render(); }
+      catch(e){ alert(e.message); f.querySelector('.save').textContent = '저장'; }
+    };
+  });
+}
+
+function renderToday(){
+  const meals = cache[ymd(day)];
+  if (!meals){ $('view').innerHTML = '<div class="verdict info">급식표를 불러오는 중이에요…</div>'; return; }
+  if (!meals.length){ $('view').innerHTML = '<div class="verdict info">이날은 급식이 없어요.</div>'; return; }
+  const bad = meals.flatMap(m => m.dishes).filter(d => badOf(d).length);
+  const verdict = !mine.size ? '<div class="verdict info">위에서 내 알레르기를 고르면 조심할 메뉴를 빨간색으로 알려 줘요.</div>'
+    : bad.length ? `<div class="verdict warn">⚠️ 조심할 메뉴가 ${bad.length}개 있어요</div>`
+    : '<div class="verdict ok">🙆 오늘 메뉴는 내 알레르기와 겹치지 않아요</div>';
+  $('view').innerHTML = verdict + meals.map(m => `
+    ${meals.length > 1 ? `<h2>${esc(m.name)}</h2>` : ''}
+    <div class="tray">${m.dishes.map(d => dishHtml(ymd(day), d)).join('')}</div>
+    <div class="kcal">${m.kcal ? m.kcal + ' kcal' : ''}</div>
+    ${m.orplc.length ? `<details><summary>🌾 원산지 보기</summary>${m.orplc.map(esc).join(' · ')}</details>` : ''}`).join('')
+    + (SHARE_URL ? '' : '<p class="foot">※ 메뉴 평가는 선생님이 공유 서버를 연결하면 열려요.</p>');
+  wireDishes();
+}
+
+function renderWeek(){
+  const days = weekDays(day);
+  if (days.some(d => !cache[ymd(d)])){ $('view').innerHTML = '<div class="verdict info">이번 주 급식표를 불러오는 중이에요…</div>'; return; }
+  const t = ymd(today0());
+  const warnDays = days.filter(d => cache[ymd(d)].some(m => m.dishes.some(x => badOf(x).length))).length;
+  $('view').innerHTML = (mine.size ? `<div class="verdict ${warnDays ? 'warn' : 'ok'}">${warnDays ? `⚠️ 이번 주에 조심할 날이 ${warnDays}일 있어요` : '🙆 이번 주는 조심할 메뉴가 없어요'}</div>` : '')
+    + '<div class="week">' + days.map(d => {
+      const ms = cache[ymd(d)], dishes = ms.flatMap(m => m.dishes), b = dishes.filter(x => badOf(x).length).length;
+      return `<div class="wday${b ? ' bad' : ''}${ymd(d) === t ? ' today' : ''}"><div class="h">${md(d)}${b ? ` <span style="color:var(--red)">⚠️ ${b}</span>` : ''}<span class="k">${ms.length ? Math.round(ms.reduce((s, m) => s + m.kcal, 0)) + ' kcal' : ''}</span></div>
+        <div class="m">${dishes.length ? dishes.map(x => badOf(x).length ? `<span class="x">${esc(x.name)}</span>` : esc(x.name)).join(', ') : '급식 없음'}</div></div>`;
+    }).join('') + '</div>';
+}
+
+function renderNutri(){
+  const days = weekDays(day);
+  if (days.some(d => !cache[ymd(d)])){ $('view').innerHTML = '<div class="verdict info">이번 주 급식표를 불러오는 중이에요…</div>'; return; }
+  const rows = days.map(d => {
+    const m = cache[ymd(d)][0];
+    return { d, kcal: m ? m.kcal : 0, c: m ? m.ntr['탄수화물(g)'] || 0 : 0, p: m ? m.ntr['단백질(g)'] || 0 : 0, f: m ? m.ntr['지방(g)'] || 0 : 0, ntr: m ? m.ntr : {} };
+  });
+  const W = 600, H = 230, L = 34, B = 30, cw = (W - L) / 5;
+  const maxG = Math.max(10, ...rows.map(r => Math.max(r.c, r.p, r.f)));
+  const maxK = Math.max(100, ...rows.map(r => r.kcal));
+  const y = (v, max) => H - B - (v / max) * (H - B - 18);
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="이번 주 탄수화물 단백질 지방 그래프">`;
+  [0, .5, 1].forEach(t => { const v = Math.round(maxG * t); svg += `<line x1="${L}" x2="${W}" y1="${y(v, maxG)}" y2="${y(v, maxG)}" stroke="#e3e8df"/><text x="${L - 6}" y="${y(v, maxG) + 5}" font-size="14" text-anchor="end" fill="#8a93a3">${v}</text>`; });
+  rows.forEach((r, i) => {
+    const x0 = L + i * cw + cw * .18, bw = cw * .2;
+    [[r.c, 'var(--c1)'], [r.p, 'var(--c2)'], [r.f, 'var(--c3)']].forEach(([v, col], k) => {
+      svg += `<rect x="${x0 + k * bw}" y="${y(v, maxG)}" width="${bw - 3}" height="${H - B - y(v, maxG)}" rx="3" fill="${col}"><title>${v} g</title></rect>`;
+    });
+    svg += `<text x="${L + i * cw + cw / 2}" y="${H - 8}" font-size="16" text-anchor="middle" fill="#2b3a55">${md(r.d)}</text>`;
+  });
+  svg += '</svg>';
+  let ksvg = `<svg viewBox="0 0 ${W} 150" width="100%" role="img" aria-label="이번 주 열량 그래프">`;
+  rows.forEach((r, i) => {
+    const h = (r.kcal / maxK) * 100, x = L + i * cw + cw * .25;
+    ksvg += `<rect x="${x}" y="${118 - h}" width="${cw * .5}" height="${h}" rx="4" fill="#f5c36b"/><text x="${x + cw * .25}" y="${112 - h}" font-size="15" text-anchor="middle" fill="#5b6475">${r.kcal ? Math.round(r.kcal) : '-'}</text><text x="${L + i * cw + cw / 2}" y="142" font-size="16" text-anchor="middle" fill="#2b3a55">${md(r.d)}</text>`;
+  });
+  ksvg += '</svg>';
+  const keys = ['칼슘(mg)', '철분(mg)', '비타민C(mg)', '비타민A(R.E)'];
+  const valid = rows.filter(r => r.kcal);
+  const avg = k => valid.length ? (valid.reduce((s, r) => s + (r.ntr[k] || 0), 0) / valid.length).toFixed(1) : '-';
+  $('view').innerHTML = `<h2>🔥 하루 열량 (kcal)</h2>${ksvg}
+    <h2 style="margin-top:14px">🥗 3대 영양소 (g)</h2>
+    <div class="legend"><span><i style="background:var(--c1)"></i>탄수화물</span><span><i style="background:var(--c2)"></i>단백질</span><span><i style="background:var(--c3)"></i>지방</span></div>${svg}
+    <h2 style="margin-top:14px">💊 이번 주 평균</h2>
+    <table><tr><th>영양소</th>${valid.map(r => `<th>${r.d.getMonth() + 1}/${r.d.getDate()}</th>`).join('')}<th>평균</th></tr>
+    ${keys.map(k => `<tr><td>${k}</td>${valid.map(r => `<td>${r.ntr[k] ?? '-'}</td>`).join('')}<td><b>${avg(k)}</b></td></tr>`).join('')}</table>`;
+}
+
+async function renderRank(){
+  if (!SHARE_URL){ $('view').innerHTML = '<div class="verdict info">인기 순위는 선생님이 공유 서버를 연결하면 볼 수 있어요.</div>'; return; }
+  $('view').innerHTML = '<div class="verdict info">순위를 불러오는 중이에요…</div>';
+  try{
+    const j = await (await fetch(`${SHARE_URL}?rank=1`)).json();
+    const li = (arr, f) => arr.length ? `<ol class="rank">${arr.map(f).join('')}</ol>` : '<p class="foot">아직 평가가 모자라요. (3명 이상 평가한 메뉴만 보여요)</p>';
+    $('view').innerHTML = `<h2>🏆 최근 한 달 인기 메뉴</h2>${li(j.top, x => `<li>${esc(x.dish)}<span class="n">★ ${x.avg.toFixed(1)} · ${x.n}명</span></li>`)}
+      <h2 style="margin-top:14px">🥡 남길 것 같다는 메뉴</h2>${li(j.left, x => `<li>${esc(x.dish)}<span class="n">${x.left}명 / ${x.n}명</span></li>`)}
+      <h2 style="margin-top:14px">🏫 반별 참여</h2>${j.classes.length ? `<table><tr><th>반</th><th>평가 수</th></tr>${j.classes.map(c => `<tr><td>${esc(c.gc)}</td><td>${c.n}</td></tr>`).join('')}</table>` : '<p class="foot">아직 없어요.</p>'}`;
+  }catch(e){ $('view').innerHTML = '<div class="verdict info">순위를 불러오지 못했어요.</div>'; }
+}
+
+function render(){
+  $('nav').classList.toggle('hidden', view === 'rank');
+  if (view === 'today'){ $('day').textContent = md(day); renderToday(); }
+  else if (view === 'rank'){ renderRank(); }
+  else { const w = weekDays(day); $('day').textContent = `${md(w[0])} ~ ${md(w[4])}`; view === 'week' ? renderWeek() : renderNutri(); }
+}
+async function load(){
+  const w = weekDays(day);
+  render();
+  try{ await Promise.all([fetchMeals(w[0], w[4]), pullShared(w[0], w[4])]); }
+  catch(e){ $('view').innerHTML = '<div class="verdict info">급식표를 불러오지 못했어요. 인터넷 연결을 확인해요.</div>'; return; }
+  render();
+}
+function move(step){
+  if (view === 'today'){ do { day.setDate(day.getDate() + step); } while (day.getDay() === 0 || day.getDay() === 6); }
+  else day.setDate(day.getDate() + step * 7);
+  openForm = null; load();
+}
 $('prev').onclick = () => move(-1);
 $('next').onclick = () => move(1);
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+  view = t.dataset.v; document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === t)); render();
+});
+
+fillClass();
 if (!mine.size) $('pick').classList.remove('hidden');
 renderMine();
 load();
