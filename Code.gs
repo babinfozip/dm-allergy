@@ -13,13 +13,15 @@
  * 학생 이름은 모으지 않아요(반만). 부적절한 한마디는 checks 탭 '숨김' 칸에 1을 적으면 앱에서 안 보여요.
  */
 
+// 시트에 붙은 스크립트면 비워 두고, 따로 만든 스크립트면 시트 주소의 /d/ 뒤 ID를 넣어요.
+const SHEET_ID = '';
 const CLASSES = ['1-1', '1-2', '1-3', '2-1', '2-2', '2-3', '3-1', '3-2'];
 const label_ = gc => gc.split('-')[0] + '학년 ' + gc.split('-')[1] + '반';
 // 아주 기본적인 말 거르기: 걸리면 저장은 하되 숨김 처리
 const BAD = ['시발', '씨발', 'ㅅㅂ', '병신', 'ㅂㅅ', '존나', 'ㅈㄴ', '개새', '꺼져', '죽어', '미친', '맛없', '토나', '쓰레기'];
 
 function sheet_(name, head) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = SHEET_ID ? SpreadsheetApp.openById(SHEET_ID) : SpreadsheetApp.getActiveSpreadsheet();
   let sh = ss.getSheetByName(name);
   if (!sh) { sh = ss.insertSheet(name); sh.appendRow(head); sh.setFrozenRows(1); }
   return sh;
