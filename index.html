@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>동명 급식 알레르기 알리미</title>
+<meta name="theme-color" content="#fffdf6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --desk:#e6efe4; --paper:#fffdf6; --ink:#2b3a55; --pencil:#5b6475; --line:#dfe8d8;
+    --red:#d9433a; --redbg:#fde6e3; --green:#2e8b57; --greenbg:#e5f4ea; --tray:#cfe3d4; --chip:#f3efe2; --pick:#ffcf6e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--desk);color:var(--ink);font-family:'Gaegu',cursive;font-size:21px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:640px;margin:0 auto;padding:20px 16px 60px}
+  .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  h1{font-family:'Jua',sans-serif;font-size:28px;margin:0;letter-spacing:1px}
+  h1 small{display:block;font-family:'Gaegu',cursive;font-size:18px;color:var(--pencil);letter-spacing:0}
+  .nav{margin-left:auto;display:flex;align-items:center;gap:6px}
+  button{font-family:'Jua',sans-serif;font-size:17px;border:0;border-radius:12px;min-height:44px;padding:0 14px;cursor:pointer;color:var(--ink);background:#fff;box-shadow:0 2px 0 rgba(0,0,0,.08)}
+  .nav .day{font-family:'Jua',sans-serif;font-size:19px;min-width:96px;text-align:center}
+
+  .card{background:var(--paper);border-radius:16px;box-shadow:0 2px 0 #cfd9c8,0 10px 24px rgba(40,70,40,.10);padding:18px 18px 16px;margin-bottom:14px}
+  .card h2{font-family:'Jua',sans-serif;font-size:19px;margin:0 0 10px;color:var(--pencil);font-weight:400}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-family:'Gaegu',cursive;font-weight:700;font-size:19px;background:var(--chip);min-height:44px;padding:0 12px;border-radius:22px}
+  .chip[aria-pressed="true"]{background:var(--pick)}
+  .chip b{font-family:'Jua',sans-serif;font-weight:400;font-size:14px;color:var(--pencil);margin-right:4px}
+  .mine{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .mine .tag{background:var(--pick);border-radius:14px;padding:2px 10px;font-weight:700}
+  .mine .none{color:var(--pencil)}
+  .mine button{margin-left:auto}
+
+  .verdict{font-family:'Jua',sans-serif;font-size:22px;padding:12px 14px;border-radius:12px;margin-bottom:12px}
+  .verdict.ok{background:var(--greenbg);color:var(--green)}
+  .verdict.warn{background:var(--redbg);color:var(--red)}
+  .verdict.info{background:#eef1f6;color:var(--pencil)}
+  .meal-name{font-family:'Jua',sans-serif;font-size:17px;color:var(--pencil);margin:10px 0 4px}
+  .tray{background:var(--tray);border-radius:14px;padding:8px;display:grid;gap:6px}
+  .dish{background:#fff;border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700}
+  .dish .mark{font-size:20px;width:26px;text-align:center}
+  .dish .why{margin-left:auto;font-size:17px;font-weight:700;color:var(--red);text-align:right}
+  .dish.bad{background:var(--redbg);color:var(--red);outline:2px solid #f1b3ab}
+  .kcal{text-align:right;color:var(--pencil);font-size:17px;margin-top:6px}
+  .foot{color:var(--pencil);font-size:17px;line-height:1.4;margin-top:6px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>🍱 급식 알레르기 알리미<small>동명중학교 · 나이스 급식 식단 기준</small></h1>
+    <div class="nav">
+      <button id="prev" aria-label="이전 날">◀</button>
+      <span class="day" id="day">-</span>
+      <button id="next" aria-label="다음 날">▶</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>내 알레르기</h2>
+    <div class="mine" id="mine"></div>
+    <div class="chips hidden" id="pick" style="margin-top:12px"></div>
+  </div>
+
+  <div class="card">
+    <div id="result"><div class="verdict info">급식표를 불러오는 중이에요…</div></div>
+  </div>
+
+  <p class="foot">※ 알레르기 번호는 나이스 급식 식단표에 나온 그대로예요. 걱정되는 음식은 꼭 영양 선생님께 한 번 더 확인해요.<br>※ 내가 고른 알레르기는 이 기기에만 저장되고, 어디에도 보내지 않아요.</p>
+</div>
+
+<script src="config.js"></script>
+<script>
+const OFFICE = 'G10', SCHOOL = '7441032';
+const NEIS_KEY = String((window.APP_CONFIG || {}).NEIS_KEY || '').trim();
+// 식품의약품안전처 알레르기 유발 식품 표시 번호 (나이스 급식 식단표와 같은 번호)
+const ALLERGENS = ['', '난류', '우유', '메밀', '땅콩', '대두', '밀', '고등어', '게', '새우', '돼지고기',
+  '복숭아', '토마토', '아황산류', '호두', '닭고기', '쇠고기', '오징어', '조개류', '잣'];
+
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+let mine = new Set(store.get('meal-allergy', []));
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate());
+const WD = ['일', '월', '화', '수', '목', '금', '토'];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+let day = new Date(); day.setHours(0, 0, 0, 0);
+while (day.getDay() === 0 || day.getDay() === 6) day.setDate(day.getDate() + 1);
+
+function move(step){
+  do { day.setDate(day.getDate() + step); } while (day.getDay() === 0 || day.getDay() === 6);
+  load();
+}
+
+// ---------- 내 알레르기 ----------
+function renderMine(){
+  const list = [...mine].sort((a, b) => a - b);
+  $('mine').innerHTML = (list.length
+    ? list.map(n => `<span class="tag">${ALLERGENS[n]}</span>`).join('')
+    : '<span class="none">아직 고르지 않았어요</span>')
+    + `<button id="edit">${$('pick').classList.contains('hidden') ? '고르기' : '다 골랐어요'}</button>`;
+  $('edit').onclick = () => { $('pick').classList.toggle('hidden'); renderMine(); };
+  $('pick').innerHTML = ALLERGENS.slice(1).map((name, i) =>
+    `<button class="chip" data-n="${i + 1}" aria-pressed="${mine.has(i + 1)}"><b>${i + 1}</b>${name}</button>`).join('');
+  $('pick').querySelectorAll('.chip').forEach(b => b.onclick = () => {
+    const n = +b.dataset.n; mine.has(n) ? mine.delete(n) : mine.add(n);
+    store.set('meal-allergy', [...mine]); renderMine(); show();
+  });
+}
+
+// ---------- 급식 ----------
+let meals = [];   // [{name, kcal, dishes:[{name, nums}]}]
+function parseDishes(html){
+  return String(html).split(/<br\s*\/?>/i).map(s => s.trim()).filter(Boolean).map(line => {
+    const m = line.match(/\(([\d.\s]+)\)\s*$/);
+    const nums = m ? m[1].split('.').map(x => +x.trim()).filter(n => n >= 1 && n <= 19) : [];
+    return { name: (m ? line.slice(0, m.index) : line).trim(), nums };
+  });
+}
+async function load(){
+  $('day').textContent = `${day.getMonth() + 1}/${day.getDate()}(${WD[day.getDay()]})`;
+  $('result').innerHTML = '<div class="verdict info">급식표를 불러오는 중이에요…</div>';
+  try{
+    const key = NEIS_KEY ? `&KEY=${encodeURIComponent(NEIS_KEY)}` : '';
+    const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&pSize=10&ATPT_OFCDC_SC_CODE=${OFFICE}&SD_SCHUL_CODE=${SCHOOL}${key}&MLSV_YMD=${ymd(day)}`;
+    const j = await (await fetch(url)).json();
+    const rows = j.mealServiceDietInfo ? j.mealServiceDietInfo[1].row : [];
+    meals = rows.map(r => ({ name: r.MMEAL_SC_NM, kcal: r.CAL_INFO, dishes: parseDishes(r.DDISH_NM) }));
+  }catch(e){ meals = null; }
+  show();
+}
+function show(){
+  if (meals === null){ $('result').innerHTML = '<div class="verdict info">급식표를 불러오지 못했어요. 인터넷 연결을 확인해요.</div>'; return; }
+  if (!meals.length){ $('result').innerHTML = '<div class="verdict info">이날은 급식이 없어요.</div>'; return; }
+  const bad = meals.flatMap(m => m.dishes).filter(d => d.nums.some(n => mine.has(n)));
+  const verdict = !mine.size
+    ? '<div class="verdict info">위에서 내 알레르기를 고르면 조심할 메뉴를 빨간색으로 알려 줘요.</div>'
+    : bad.length
+      ? `<div class="verdict warn">⚠️ 조심할 메뉴가 ${bad.length}개 있어요</div>`
+      : '<div class="verdict ok">🙆 오늘 메뉴는 내 알레르기와 겹치지 않아요</div>';
+  $('result').innerHTML = verdict + meals.map(m => `
+    ${meals.length > 1 ? `<div class="meal-name">${esc(m.name)}</div>` : ''}
+    <div class="tray">${m.dishes.map(d => {
+      const hit = d.nums.filter(n => mine.has(n));
+      return `<div class="dish${hit.length ? ' bad' : ''}"><span class="mark">${hit.length ? '⚠️' : (mine.size ? '✓' : '·')}</span>${esc(d.name)}`
+        + (hit.length ? `<span class="why">${hit.map(n => ALLERGENS[n]).join('·')}</span>` : '') + '</div>';
+    }).join('')}</div>
+    ${m.kcal ? `<div class="kcal">${esc(m.kcal)}</div>` : ''}`).join('');
+}
+
+$('prev').onclick = () => move(-1);
+$('next').onclick = () => move(1);
+if (!mine.size) $('pick').classList.remove('hidden');
+renderMine();
+load();
+</script>
+</body>
+</html>
